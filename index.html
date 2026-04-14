@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Let it be — Кафе-пекарня в Минске</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ivory:    '#FAF7F4',
+            mahogany: '#1C1412',
+            blush:    '#F0E8E1',
+            rosewood: '#7A6259',
+            crimson:  '#C0392B',
+            dusty:    '#E8C4BF',
+          },
+          fontFamily: {
+            serif: ['"Cormorant Garamond"', 'serif'],
+            sans:  ['Jost', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    /* ── Warm paper texture ─────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 50;
+    }
+
+    /* ── Vertical writing mode ──────────────────────────── */
+    .vtext { writing-mode: vertical-rl; text-orientation: mixed; }
+
+    /* ── Primary button: crimson slide ─────────────────── */
+    .btn-p {
+      position: relative; overflow: hidden;
+      background: #1C1412; color: #FAF7F4;
+      display: inline-flex; align-items: center; justify-content: center;
+    }
+    .btn-p .slide {
+      position: absolute; inset: 0; background: #C0392B;
+      transform: translateX(-100%);
+      transition: transform 500ms cubic-bezier(.25,.46,.45,.94);
+    }
+    .btn-p:hover .slide { transform: translateX(0); }
+    .btn-p .label { position: relative; z-index: 10; }
+
+    /* ── Secondary button ───────────────────────────────── */
+    .btn-s {
+      border: 1px solid #1C1412; color: #1C1412; background: transparent;
+      display: inline-flex; align-items: center; justify-content: center;
+      transition: background 500ms ease-out, color 500ms ease-out;
+    }
+    .btn-s:hover { background: #1C1412; color: #FAF7F4; }
+
+    /* ── Image hover scale ──────────────────────────────── */
+    .img-warm { transition: transform 1500ms ease-out; }
+    .group:hover .img-warm { transform: scale(1.04); }
+
+    /* ── Nav links ──────────────────────────────────────── */
+    .nav-a {
+      position: relative; text-decoration: none;
+      transition: color 500ms ease-out;
+    }
+    .nav-a::after {
+      content: ''; position: absolute; bottom: -2px; left: 0;
+      width: 0; height: 1px; background: #C0392B;
+      transition: width 500ms ease-out;
+    }
+    .nav-a:hover { color: #C0392B; }
+    .nav-a:hover::after { width: 100%; }
+
+    /* ── Mobile menu ────────────────────────────────────── */
+    #mobile-menu {
+      max-height: 0; overflow: hidden;
+      transition: max-height 500ms cubic-bezier(.25,.46,.45,.94);
+    }
+    #mobile-menu.open { max-height: 400px; }
+
+    /* ── Hamburger ──────────────────────────────────────── */
+    .ham-line {
+      display: block; width: 22px; height: 1.5px;
+      background: #1C1412;
+      transition: transform 400ms ease-out, opacity 300ms ease-out;
+      transform-origin: center;
+    }
+    .ham.open .ham-line:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+    .ham.open .ham-line:nth-child(2) { opacity: 0; }
+    .ham.open .ham-line:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+
+    /* ── Review card ────────────────────────────────────── */
+    .review-card {
+      border-left: 2px solid rgba(28,20,18,.15); padding-left: 1.5rem;
+      transition: border-color 700ms ease-out, background 700ms ease-out;
+    }
+    .review-card:hover { border-left-color: #C0392B; background: rgba(240,232,225,.3); }
+
+    /* ── Feature card ───────────────────────────────────── */
+    .feat-card {
+      border-top: 1px solid rgba(28,20,18,.15);
+      transition: background 700ms ease-out, box-shadow 700ms ease-out;
+    }
+    .feat-card:hover { background: rgba(240,232,225,.5); box-shadow: 0 8px 24px rgba(28,20,18,.07); }
+    .feat-card:hover .feat-num { color: #C0392B; }
+
+    /* ── Horizontal scroll cards (mobile menu) ──────────── */
+    .cards-scroll {
+      display: flex; gap: 0; overflow-x: auto;
+      scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .cards-scroll::-webkit-scrollbar { display: none; }
+    .cards-scroll .card-snap {
+      flex: 0 0 80vw; max-width: 320px;
+      scroll-snap-align: start;
+    }
+
+    /* ── Scroll bar warm ────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: #FAF7F4; }
+    ::-webkit-scrollbar-thumb { background: rgba(28,20,18,.2); }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-ivory text-mahogany font-sans antialiased">
+
+  <!-- ══════════════════════════════════════════
+       NAVIGATION
+  ══════════════════════════════════════════ -->
+  <nav class="sticky top-0 z-30 bg-ivory/95 backdrop-blur-sm" style="border-bottom: 1px solid rgba(28,20,18,.1);">
+    <div class="max-w-[1600px] mx-auto px-5 md:px-10 lg:px-16 flex items-center justify-between h-[62px] md:h-[68px]">
+
+      <!-- Logo -->
+      <a href="#"><img src="Let it be logo.png" alt="Let it be" class="h-7 md:h-9"></a>
+
+      <!-- Desktop links -->
+      <div class="hidden md:flex items-center gap-10">
+        <a href="#about"   class="nav-a text-[11px] font-medium tracking-[.22em] uppercase text-mahogany">О нас</a>
+        <a href="#menu"    class="nav-a text-[11px] font-medium tracking-[.22em] uppercase text-mahogany">Меню</a>
+        <a href="#reviews" class="nav-a text-[11px] font-medium tracking-[.22em] uppercase text-mahogany">Отзывы</a>
+        <a href="#contact" class="nav-a text-[11px] font-medium tracking-[.22em] uppercase text-mahogany">Контакты</a>
+        <a href="tel:+375291780088"
+           class="btn-p h-11 px-7 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+           style="box-shadow:0 4px 16px rgba(192,57,43,.20);">
+          <span class="slide"></span><span class="label">Заказать стол</span>
+        </a>
+      </div>
+
+      <!-- Mobile right: phone + hamburger -->
+      <div class="flex md:hidden items-center gap-4">
+        <a href="tel:+375291780088"
+           class="btn-p h-9 px-5 text-[10px] font-medium tracking-[.18em] uppercase no-underline"
+           style="box-shadow:0 2px 10px rgba(192,57,43,.20);">
+          <span class="slide"></span><span class="label">Позвонить</span>
+        </a>
+        <button id="ham-btn" class="ham flex flex-col gap-[5px] p-1" aria-label="Меню">
+          <span class="ham-line"></span>
+          <span class="ham-line"></span>
+          <span class="ham-line"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile dropdown menu -->
+    <div id="mobile-menu" style="border-top: 1px solid rgba(28,20,18,.08);">
+      <div class="px-5 py-6 flex flex-col gap-5 bg-ivory">
+        <a href="#about"   class="text-[11px] font-medium tracking-[.22em] uppercase text-mahogany no-underline" onclick="closeMenu()">О нас</a>
+        <a href="#menu"    class="text-[11px] font-medium tracking-[.22em] uppercase text-mahogany no-underline" onclick="closeMenu()">Меню</a>
+        <a href="#reviews" class="text-[11px] font-medium tracking-[.22em] uppercase text-mahogany no-underline" onclick="closeMenu()">Отзывы</a>
+        <a href="#contact" class="text-[11px] font-medium tracking-[.22em] uppercase text-mahogany no-underline" onclick="closeMenu()">Контакты</a>
+        <div style="height:1px; background:rgba(28,20,18,.1);"></div>
+        <address class="not-italic text-[11px] text-rosewood tracking-wide">ул. Октябрьская, 23А · Минск<br>Открыты с 08:00</address>
+      </div>
+    </div>
+  </nav>
+
+  <script>
+    const btn = document.getElementById('ham-btn');
+    const menu = document.getElementById('mobile-menu');
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('open');
+      menu.classList.toggle('open');
+    });
+    function closeMenu() {
+      btn.classList.remove('open');
+      menu.classList.remove('open');
+    }
+  </script>
+
+  <!-- ══════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════ -->
+  <section class="max-w-[1600px] mx-auto px-5 md:px-10 lg:px-16 pt-10 md:pt-16 lg:pt-24">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20 items-end lg:items-start">
+
+      <!-- On mobile: image first, text second -->
+      <!-- Right: image + stats (shown first on mobile via order) -->
+      <div class="relative flex flex-col order-2 lg:order-last" style="min-height: 56vw; max-height: 75vh;">
+
+        <span class="vtext hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2
+                     text-[10px] font-medium tracking-[.3em] uppercase text-rosewood/60 z-10">
+          Let it be · Минск
+        </span>
+
+        <!-- Hero image -->
+        <div class="group flex-1 overflow-hidden relative"
+             style="border-radius: 16px; box-shadow: 0 8px 32px rgba(28,20,18,.14);">
+          <img src="images/hero.webp" alt="Интерьер кафе Let it be"
+               class="img-warm w-full h-full object-cover" style="min-height: 56vw; max-height: 75vh;">
+        </div>
+
+        <!-- Stats strip -->
+        <div class="grid grid-cols-3" style="border-top: 1px solid rgba(28,20,18,.12);">
+          <div class="py-4 px-3 md:py-5 md:px-5" style="border-right: 1px solid rgba(28,20,18,.12);">
+            <div class="font-serif font-light text-crimson" style="font-size: clamp(1.25rem, 4vw, 2rem); line-height:1;">08:00</div>
+            <div class="text-[9px] md:text-[10px] tracking-[.18em] uppercase text-rosewood mt-1">Открываемся</div>
+          </div>
+          <div class="py-4 px-3 md:py-5 md:px-5" style="border-right: 1px solid rgba(28,20,18,.12);">
+            <div class="font-serif font-light text-crimson" style="font-size: clamp(1rem, 3.5vw, 1.35rem); line-height:1.1;">Завтраки<br>целый день</div>
+            <div class="text-[9px] md:text-[10px] tracking-[.18em] uppercase text-rosewood mt-1">Всегда</div>
+          </div>
+          <div class="py-4 px-3 md:py-5 md:px-5">
+            <div class="font-serif font-light text-crimson" style="font-size: clamp(1rem, 3.5vw, 1.35rem); line-height:1.1;">Летняя<br>веранда</div>
+            <div class="text-[9px] md:text-[10px] tracking-[.18em] uppercase text-rosewood mt-1">Тёплый сезон</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Left: copy -->
+      <div class="pb-4 lg:pb-20 order-1 lg:order-first">
+        <div class="flex items-center gap-3 mb-6 md:mb-10">
+          <span class="h-px w-8 bg-crimson block flex-shrink-0"></span>
+          <span class="text-[9px] md:text-[10px] font-medium tracking-[.25em] uppercase text-rosewood leading-relaxed">Кафе-пекарня · Минск, ул. Октябрьская 23А</span>
+        </div>
+
+        <!-- Mobile: 2 строки, крупнее -->
+        <h1 class="md:hidden font-serif font-light leading-[.9] text-mahogany mb-6" style="font-size: 5rem;">
+          Пусть <em class="text-crimson italic">будет</em><br>
+          вкусно
+        </h1>
+        <!-- Desktop: 3 строки -->
+        <h1 class="hidden md:block font-serif font-light leading-[.92] text-mahogany mb-8"
+            style="font-size: clamp(3rem, 10vw, 7.5rem);">
+          Пусть<br>
+          <em class="text-crimson italic">будет</em><br>
+          вкусно
+        </h1>
+
+        <p class="text-sm md:text-base lg:text-lg leading-relaxed text-rosewood mb-8 md:mb-10" style="max-width: 28rem;">
+          Авторские завтраки, свежая выпечка и specialty-кофе. Открываемся в 08:00 — для тех, кто начинает день неспешно и со вкусом.
+        </p>
+
+        <div class="flex flex-col sm:flex-row flex-wrap gap-3">
+          <a href="tel:+375291780088"
+             class="btn-p px-7 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+             style="height:48px; box-shadow:0 4px 16px rgba(192,57,43,.20);">
+            <span class="slide"></span><span class="label">Забронировать стол</span>
+          </a>
+          <a href="https://yandex.by/maps" target="_blank" rel="noopener"
+             class="btn-s px-7 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+             style="height:48px;">
+            Яндекс Карты
+          </a>
+          <a href="#menu"
+             class="btn-s px-7 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+             style="height:48px;">
+            Меню
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       ABOUT — dark section
+  ══════════════════════════════════════════ -->
+  <section id="about" class="mt-16 md:mt-24 lg:mt-32 py-16 md:py-24 lg:py-32 px-5 md:px-10 lg:px-16" style="background: #F0E8E1;">
+    <div class="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-[1fr_2fr] gap-12 lg:gap-24 items-start">
+
+      <!-- Left -->
+      <div>
+        <div class="flex items-center gap-4 mb-8">
+          <span class="h-px w-10 bg-crimson block"></span>
+          <span class="text-[10px] font-medium tracking-[.3em] uppercase text-mahogany/50">О заведении</span>
+        </div>
+        <h2 class="font-serif font-light leading-[.93] text-mahogany mb-8" style="font-size: clamp(2.5rem, 8vw, 5rem);">
+          Атмосфера<br>
+          <em class="text-crimson italic" style="font-size: clamp(3.5rem, 11vw, 7rem);">тепла</em>
+        </h2>
+        <a href="tel:+375291780088"
+           class="btn-p px-7 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+           style="height:48px; box-shadow:0 4px 16px rgba(192,57,43,.20);">
+          <span class="slide"></span><span class="label">Забронировать стол</span>
+        </a>
+      </div>
+
+      <!-- Right -->
+      <div>
+        <p class="leading-relaxed text-mahogany/80 mb-10 md:mb-12 max-w-2xl" style="font-size: clamp(1.15rem, 2.2vw, 1.5rem);">
+          Кафе-пекарня «Let it be» — место, где хочется остаться ещё на один кофе. Открытая кухня за стеклом, огромная текстильная люстра, specialty-кофе и завтраки, которые заряжают весь день.
+        </p>
+
+        <div class="grid grid-cols-2" style="border-top: 1px solid rgba(28,20,18,.15);">
+          <div class="py-4 md:py-5 pr-6" style="border-bottom: 1px solid rgba(28,20,18,.1); border-right: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Завтраки с 08:00</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Одни из первых в округе</div>
+          </div>
+          <div class="py-4 md:py-5 pl-6" style="border-bottom: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Открытая кухня</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Готовим на ваших глазах</div>
+          </div>
+          <div class="py-4 md:py-5 pr-6" style="border-bottom: 1px solid rgba(28,20,18,.1); border-right: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Бизнес-ланч · 25 BYN</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Каждый день</div>
+          </div>
+          <div class="py-4 md:py-5 pl-6" style="border-bottom: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Летняя веранда</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Тёплый сезон</div>
+          </div>
+          <div class="py-4 md:py-5 pr-6" style="border-bottom: 1px solid rgba(28,20,18,.1); border-right: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Доставка · Яндекс.Еда</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Еда навынос · Самовывоз</div>
+          </div>
+          <div class="py-4 md:py-5 pl-6" style="border-bottom: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Wi-Fi · Оплата картой</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Предзаказ онлайн</div>
+          </div>
+          <div class="py-4 md:py-5 pr-6" style="border-right: 1px solid rgba(28,20,18,.1);">
+            <div class="text-sm font-medium text-mahogany mb-1">Крафтовое пиво</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Авторский выбор</div>
+          </div>
+          <div class="py-4 md:py-5 pl-6">
+            <div class="text-sm font-medium text-mahogany mb-1">Подарочный сертификат</div>
+            <div class="text-[11px] tracking-wide text-rosewood">Идеальный подарок</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       MENU HIGHLIGHTS
+  ══════════════════════════════════════════ -->
+  <section id="menu" class="py-16 md:py-24 lg:py-32">
+    <div class="max-w-[1600px] mx-auto">
+
+      <!-- Header -->
+      <div class="px-5 md:px-10 lg:px-16 mb-10 md:mb-16 lg:mb-20">
+        <div class="flex items-center gap-4 mb-6 md:mb-8">
+          <span class="h-px w-10 bg-crimson block"></span>
+          <span class="text-[10px] font-medium tracking-[.3em] uppercase text-rosewood">наше меню</span>
+        </div>
+        <h2 class="font-serif font-light leading-[.93] text-mahogany mb-5" style="font-size: clamp(2.5rem, 8vw, 5.5rem); white-space: nowrap;">
+          Любимые <em class="text-crimson italic">гостями</em> блюда
+        </h2>
+        <p class="leading-relaxed text-rosewood md:whitespace-nowrap" style="font-size: clamp(1.1rem, 2vw, 1.4rem);">
+          Авторская кухня, европейские завтраки,<br class="md:hidden"> итальянская выпечка и идеальный кофе.
+        </p>
+      </div>
+
+      <!-- Mobile: horizontal scroll. Desktop: grid -->
+      <div class="lg:hidden px-5 md:px-10">
+        <div class="cards-scroll" style="border-top: 1px solid rgba(28,20,18,.12); padding-bottom: 1rem;">
+          <!-- Card 1 -->
+          <div class="feat-card card-snap group p-6 border-r border-mahogany/12 cursor-default">
+            <div class="overflow-hidden mb-5" style="aspect-ratio:3/4;">
+              <img src="images/breakfast.webp" alt="Завтраки" class="img-warm w-full h-full object-cover">
+            </div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="h-px w-5 bg-crimson block"></span>
+              <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood">01</span>
+            </div>
+            <h3 class="font-serif font-light text-xl text-mahogany leading-tight mb-2">Завтраки</h3>
+            <p class="text-sm leading-relaxed text-rosewood">Сырники, блинчики, «Let it be Breakfast» — огромные порции с самого утра.</p>
+            <div class="mt-4 flex items-center gap-2">
+              <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">с 08:00</span>
+              <span class="h-px flex-1 bg-mahogany/10 block"></span>
+            </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="feat-card card-snap group p-6 border-r border-mahogany/12 cursor-default">
+            <div class="overflow-hidden mb-5" style="aspect-ratio:3/4;">
+              <img src="images/bakery.webp" alt="Выпечка" class="img-warm w-full h-full object-cover">
+            </div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="h-px w-5 bg-crimson block"></span>
+              <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood">02</span>
+            </div>
+            <h3 class="font-serif font-light text-xl text-mahogany leading-tight mb-2">Выпечка</h3>
+            <p class="text-sm leading-relaxed text-rosewood">Пирожное «Орешек», трубочка со сгущёнкой, свежие круассаны каждый день.</p>
+            <div class="mt-4 flex items-center gap-2">
+              <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">Авторские рецепты</span>
+              <span class="h-px flex-1 bg-mahogany/10 block"></span>
+            </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="feat-card card-snap group p-6 border-r border-mahogany/12 cursor-default">
+            <div class="overflow-hidden mb-5" style="aspect-ratio:3/4;">
+              <img src="images/coffee.webp" alt="Кофе" class="img-warm w-full h-full object-cover">
+            </div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="h-px w-5 bg-crimson block"></span>
+              <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood">03</span>
+            </div>
+            <h3 class="font-serif font-light text-xl text-mahogany leading-tight mb-2">Specialty-кофе</h3>
+            <p class="text-sm leading-relaxed text-rosewood">«Самый хороший кофе, который пробовал» — говорят гости. Кофе с собой тоже есть.</p>
+            <div class="mt-4 flex items-center gap-2">
+              <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">Coffee to go</span>
+              <span class="h-px flex-1 bg-mahogany/10 block"></span>
+            </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="feat-card card-snap group p-6 cursor-default">
+            <div class="overflow-hidden mb-5" style="aspect-ratio:3/4;">
+              <img src="images/lunch.webp" alt="Бизнес-ланч" class="img-warm w-full h-full object-cover">
+            </div>
+            <div class="flex items-center gap-3 mb-2">
+              <span class="h-px w-5 bg-crimson block"></span>
+              <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood">04</span>
+            </div>
+            <h3 class="font-serif font-light text-xl text-mahogany leading-tight mb-2">Бизнес-ланч</h3>
+            <p class="text-sm leading-relaxed text-rosewood">Полноценный обед по фиксированной цене. Сытно, быстро, вкусно.</p>
+            <div class="mt-4 flex items-center gap-2">
+              <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">25 BYN · каждый день</span>
+              <span class="h-px flex-1 bg-mahogany/10 block"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Scroll hint -->
+        <p class="text-[10px] tracking-[.2em] uppercase text-rosewood/50 text-center mt-3">← листайте →</p>
+      </div>
+
+      <!-- Desktop: 4-column grid -->
+      <div class="hidden lg:grid grid-cols-4 gap-0 px-16" style="border-top: 1px solid rgba(28,20,18,.12);">
+        <div class="feat-card group p-8 cursor-default" style="border-right: 1px solid rgba(28,20,18,.12);">
+          <div class="overflow-hidden mb-6" style="aspect-ratio:3/4;">
+            <img src="images/breakfast.webp" alt="Завтраки" class="img-warm w-full h-full object-cover">
+          </div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="h-px w-6 bg-crimson block"></span>
+            <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood transition-colors duration-500">01</span>
+          </div>
+          <h3 class="font-serif font-light text-2xl text-mahogany leading-tight mb-3">Завтраки</h3>
+          <p class="text-sm leading-relaxed text-rosewood">Сырники с вишнёвым соусом, блинчики, «Let it be Breakfast» — огромные порции с самого утра.</p>
+          <div class="mt-5 flex items-center gap-2">
+            <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">с 08:00</span>
+            <span class="h-px flex-1 bg-mahogany/10 block"></span>
+          </div>
+        </div>
+        <div class="feat-card group p-8 cursor-default" style="border-right: 1px solid rgba(28,20,18,.12);">
+          <div class="overflow-hidden mb-6" style="aspect-ratio:3/4;">
+            <img src="images/bakery.webp" alt="Выпечка" class="img-warm w-full h-full object-cover">
+          </div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="h-px w-6 bg-crimson block"></span>
+            <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood transition-colors duration-500">02</span>
+          </div>
+          <h3 class="font-serif font-light text-2xl text-mahogany leading-tight mb-3">Выпечка</h3>
+          <p class="text-sm leading-relaxed text-rosewood">Пирожное «Орешек», трубочка со сгущёнкой, свежие круассаны — большой выбор каждый день.</p>
+          <div class="mt-5 flex items-center gap-2">
+            <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">Авторские рецепты</span>
+            <span class="h-px flex-1 bg-mahogany/10 block"></span>
+          </div>
+        </div>
+        <div class="feat-card group p-8 cursor-default" style="border-right: 1px solid rgba(28,20,18,.12);">
+          <div class="overflow-hidden mb-6" style="aspect-ratio:3/4;">
+            <img src="images/coffee.webp" alt="Кофе" class="img-warm w-full h-full object-cover">
+          </div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="h-px w-6 bg-crimson block"></span>
+            <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood transition-colors duration-500">03</span>
+          </div>
+          <h3 class="font-serif font-light text-2xl text-mahogany leading-tight mb-3">Specialty-кофе</h3>
+          <p class="text-sm leading-relaxed text-rosewood">«Самый хороший кофе, который пробовал» — так говорят гости. Кофе с собой тоже есть.</p>
+          <div class="mt-5 flex items-center gap-2">
+            <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">Coffee to go</span>
+            <span class="h-px flex-1 bg-mahogany/10 block"></span>
+          </div>
+        </div>
+        <div class="feat-card group p-8 cursor-default">
+          <div class="overflow-hidden mb-6" style="aspect-ratio:3/4;">
+            <img src="images/lunch.webp" alt="Бизнес-ланч" class="img-warm w-full h-full object-cover">
+          </div>
+          <div class="flex items-center gap-3 mb-3">
+            <span class="h-px w-6 bg-crimson block"></span>
+            <span class="feat-num text-[10px] font-medium tracking-[.25em] uppercase text-rosewood transition-colors duration-500">04</span>
+          </div>
+          <h3 class="font-serif font-light text-2xl text-mahogany leading-tight mb-3">Бизнес-ланч</h3>
+          <p class="text-sm leading-relaxed text-rosewood">Полноценный обед по фиксированной цене. Сытно, быстро, вкусно — рядом с офисом.</p>
+          <div class="mt-5 flex items-center gap-2">
+            <span class="text-[10px] tracking-[.2em] uppercase text-rosewood/70">25 BYN · каждый день</span>
+            <span class="h-px flex-1 bg-mahogany/10 block"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="px-5 md:px-10 lg:px-16 flex flex-col sm:flex-row gap-4"
+           style="border-top: 1px solid rgba(28,20,18,.12); padding-top: 2rem; margin-top: 2rem;">
+        <a href="#menu"
+           class="btn-s flex-1 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+           style="height: clamp(80px, 18vw, 60px); font-size: clamp(.85rem, 3.5vw, .875rem);">
+          Полное меню
+        </a>
+        <a href="tel:+375291780088"
+           class="btn-p flex-1 text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+           style="height: clamp(80px, 18vw, 60px); font-size: clamp(.85rem, 3.5vw, .875rem); box-shadow:0 4px 16px rgba(192,57,43,.20);">
+          <span class="slide"></span><span class="label">Забронировать столик</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       REVIEWS
+  ══════════════════════════════════════════ -->
+  <section id="reviews" class="bg-blush py-16 md:py-24 lg:py-32 px-5 md:px-10 lg:px-16">
+    <div class="max-w-[1600px] mx-auto">
+
+      <!-- Header -->
+      <div class="flex flex-col md:flex-row md:items-end md:justify-between mb-10 md:mb-16 gap-5">
+        <div>
+          <div class="flex items-center gap-4 mb-6 md:mb-8">
+            <span class="h-px w-10 bg-crimson block"></span>
+            <span class="text-[10px] font-medium tracking-[.3em] uppercase text-rosewood">Отзывы гостей</span>
+          </div>
+          <h2 class="font-serif font-light leading-[.93] text-mahogany" style="font-size: clamp(2.5rem, 8vw, 5.5rem);">
+            Отзывы наших <em class="text-crimson italic">гостей</em>
+          </h2>
+        </div>
+        <div class="flex items-center gap-4">
+          <span class="text-crimson" style="font-size: clamp(1.5rem, 3vw, 2rem);">★★★★★</span>
+          <span class="font-serif font-light text-mahogany" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height:1;">4.9</span>
+          <span class="text-[10px] tracking-[.2em] uppercase text-rosewood">Яндекс<br>Карты</span>
+        </div>
+      </div>
+
+      <!-- Continuous marquee carousel -->
+      <style>
+        @keyframes rc-marquee { to { transform: translateX(-50%); } }
+        #rc-track { animation: rc-marquee 16s linear infinite; }
+        #rc-viewport:hover #rc-track { animation-play-state: paused; }
+        @media (prefers-reduced-motion: reduce) {
+          #rc-track { animation: none; }
+        }
+      </style>
+
+      <div class="overflow-hidden -mx-5 md:-mx-10 lg:-mx-16" id="rc-viewport">
+        <div id="rc-track" class="flex" style="will-change: transform;"></div>
+      </div>
+
+      <script>
+      (function () {
+        const REVIEWS = [
+          { init: 'А', role: 'Гость заведения',
+            quote: '«Пирожное «Орешек» — это что-то невероятное!»',
+            body:  'Вкусный кофе и огромные порции завтрака. Сытно и атмосферно!' },
+          { init: 'М', role: 'Постоянный гость',
+            quote: '«Персонал прекрасный и душевный — ходили три дня подряд»',
+            body:  'Завтраки очень вкусные. Кофе — лучший за всё время пребывания.' },
+          { init: 'Е', role: 'Гость заведения',
+            quote: '«Огромная текстильная люстра, открытая кухня — эффектно»',
+            body:  'Готовят быстро, большой выбор выпечки. Сырники с вишнёвым соусом — очень вкусно.' },
+          { init: 'С', role: 'Постоянный гость',
+            quote: '«Еда очень вкусная, особенно десерты. Советую обязательно!»',
+            body:  'Официанты и бариста — лучшие, им бы премию каждый день давать!' },
+          { init: 'И', role: 'Гость заведения',
+            quote: '«Три дня подряд начинали день здесь — завтраки вкусные»',
+            body:  'Трубочка со сгущёнкой — отдельная история. Единственные в округе, кто работает с 8 утра.' },
+          { init: 'О', role: 'Гость заведения',
+            quote: '«Порции огромные, кофе отличный. По ценам — нормально»',
+            body:  'Классный дизайн, большая открытая кухня. Размер порции стоит каждого рубля.' },
+        ];
+
+        const track = document.getElementById('rc-track');
+
+        function cardW() {
+          // desktop: 1/3 viewport, mobile: 82vw
+          return window.innerWidth >= 1024
+            ? Math.round(window.innerWidth / 3)
+            : Math.round(window.innerWidth * 0.82);
+        }
+
+        function cardHTML(r, w) {
+          return `<article style="flex-shrink:0;width:${w}px;box-sizing:border-box;
+            padding:clamp(1.25rem,3vw,2.5rem);
+            border-left:2px solid rgba(28,20,18,.12);
+            background:#F0E8E1;">
+            <div style="margin-bottom:.75rem;color:#C0392B;font-size:.875rem;">★★★★★</div>
+            <blockquote style="font-family:'Cormorant Garamond',serif;font-weight:300;font-style:italic;
+              font-size:clamp(1rem,2vw,1.35rem);color:#1C1412;line-height:1.35;margin-bottom:.875rem;">
+              ${r.quote}
+            </blockquote>
+            <p style="font-size:.875rem;line-height:1.65;color:#7A6259;margin-bottom:1.125rem;">${r.body}</p>
+            <div style="display:flex;align-items:center;gap:.75rem;">
+              <div style="width:1.75rem;height:1.75rem;border-radius:50%;background:#E8C4BF;
+                display:flex;align-items:center;justify-content:center;
+                font-size:.75rem;color:rgba(28,20,18,.5);font-weight:500;">${r.init}</div>
+              <span style="font-size:.6875rem;letter-spacing:.15em;text-transform:uppercase;color:rgba(122,98,89,.7);">${r.role}</span>
+            </div>
+          </article>`;
+        }
+
+        function build() {
+          const w = cardW();
+          // duplicate for seamless loop: [original 6][clone 6] — animation moves -50%
+          const items = [...REVIEWS, ...REVIEWS];
+          track.innerHTML = items.map(r => cardHTML(r, w)).join('');
+        }
+
+        build();
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimer);
+          resizeTimer = setTimeout(build, 150);
+        });
+      })();
+      </script>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       CONTACT / INFO
+  ══════════════════════════════════════════ -->
+  <section id="contact" class="py-16 md:py-24 lg:py-32 px-5 md:px-10 lg:px-16">
+    <div class="max-w-[1600px] mx-auto">
+
+      <div class="mb-10 md:mb-16">
+        <div class="flex items-center gap-4 mb-6 md:mb-8">
+          <span class="h-px w-10 bg-crimson block"></span>
+          <span class="text-[10px] font-medium tracking-[.3em] uppercase text-rosewood">Контакты · Адрес</span>
+        </div>
+        <h2 class="font-serif font-light leading-[.93] text-mahogany" style="font-size: clamp(2.5rem, 8vw, 5.5rem);">
+          Как нас <em class="text-crimson italic">найти?</em>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-0" style="border-top: 1px solid rgba(28,20,18,.12);">
+
+        <!-- Address -->
+        <div class="py-8 lg:pr-12" style="border-bottom: 1px solid rgba(28,20,18,.12);">
+          <div class="text-[10px] font-medium tracking-[.3em] uppercase text-rosewood mb-4">Адрес</div>
+          <address class="not-italic">
+            <p class="font-serif font-light text-2xl text-mahogany leading-snug mb-2">
+              ул. Октябрьская, 23А<br>
+              <span class="text-rosewood text-lg">Минск, этаж 1</span>
+            </p>
+          </address>
+          <a href="https://yandex.by/maps" target="_blank" rel="noopener"
+             class="mt-5 inline-flex text-[11px] font-medium tracking-[.2em] uppercase text-mahogany no-underline"
+             style="border-bottom:1px solid rgba(28,20,18,.3); padding-bottom:2px; transition: color 500ms, border-color 500ms;"
+             onmouseover="this.style.color='#C0392B';this.style.borderColor='#C0392B'"
+             onmouseout="this.style.color='#1C1412';this.style.borderColor='rgba(28,20,18,.3)'">
+            Открыть карту →
+          </a>
+        </div>
+
+        <!-- Hours + Phone -->
+        <div class="py-8 lg:px-12" style="border-bottom: 1px solid rgba(28,20,18,.12); border-left: none;">
+          <div class="text-[10px] font-medium tracking-[.3em] uppercase text-rosewood mb-3">Часы работы</div>
+          <div class="font-serif font-light text-2xl text-mahogany mb-1">08:00 — 22:00</div>
+          <div class="text-[11px] text-rosewood tracking-wide mb-8">Ежедневно</div>
+          <div class="text-[10px] font-medium tracking-[.3em] uppercase text-rosewood mb-3">Телефон</div>
+          <a href="tel:+375291780088"
+             class="font-serif font-light text-2xl text-mahogany no-underline hover:text-crimson transition-colors duration-500 block">
+            +375 29 178-00-88
+          </a>
+        </div>
+
+        <!-- CTA -->
+        <div class="py-8 lg:pl-12 flex items-end">
+          <a href="tel:+375291780088"
+             class="btn-p w-full text-[11px] font-medium tracking-[.2em] uppercase no-underline"
+             style="height:72px; font-size: clamp(.75rem, 1.2vw, .9rem); box-shadow:0 4px 16px rgba(192,57,43,.20);">
+            <span class="slide"></span><span class="label">Позвонить и забронировать</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       FOOTER
+  ══════════════════════════════════════════ -->
+  <footer class="bg-mahogany text-ivory py-12 md:py-14 px-5 md:px-10 lg:px-16">
+    <div class="max-w-[1600px] mx-auto">
+      <div class="grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-8 items-center"
+           style="border-bottom: 1px solid rgba(250,247,244,.1); padding-bottom: 2rem; margin-bottom: 2rem;">
+
+        <div>
+          <img src="Let it be logo.png" alt="Let it be" class="h-8 mb-2"
+               style="filter: brightness(0) invert(1);">
+          <p class="text-[11px] text-ivory/50 tracking-wide">Кафе-пекарня · Минск</p>
+        </div>
+
+        <nav class="flex flex-wrap gap-6 md:gap-8 justify-start md:justify-center">
+          <a href="#about"   class="nav-a text-[10px] font-medium tracking-[.22em] uppercase text-ivory/60 no-underline">О нас</a>
+          <a href="#menu"    class="nav-a text-[10px] font-medium tracking-[.22em] uppercase text-ivory/60 no-underline">Меню</a>
+          <a href="#reviews" class="nav-a text-[10px] font-medium tracking-[.22em] uppercase text-ivory/60 no-underline">Отзывы</a>
+          <a href="#contact" class="nav-a text-[10px] font-medium tracking-[.22em] uppercase text-ivory/60 no-underline">Контакты</a>
+        </nav>
+
+        <div class="md:text-right">
+          <a href="tel:+375291780088"
+             class="font-serif font-light text-xl md:text-2xl text-ivory no-underline hover:text-crimson transition-colors duration-500 block">
+            +375 29 178-00-88
+          </a>
+          <p class="text-[10px] tracking-[.22em] uppercase text-ivory/40 mt-1">ул. Октябрьская, 23А · Минск</p>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <p class="text-[10px] tracking-wide text-ivory/30">© 2024 Let it be. Кафе-пекарня в Минске.</p>
+        <div class="w-3 h-3 rounded-full bg-crimson"
+             style="box-shadow: 0 0 0 4px rgba(192,57,43,.15);"></div>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>
